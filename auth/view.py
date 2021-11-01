@@ -13,7 +13,8 @@ def auth():
   if not auth or auth.login or auth.password:
     make_response('could not verify', 401, {'WWW.Authentication': 'Basic realm: "login required"'})
   
-  user = User.filter
+  users = User.select().where(User.login == auth.login)
+
   return 'request'
 
 @app.route('/register', methods = ["POST"])
@@ -27,7 +28,7 @@ def sign_up():
 
 @app.route('/get-users', methods = ["GET"])
 def getUsers():
-  print(url_for('auth'))
+  print(url_for('getUsers'))
   collection = []
   query = User.select()
   for user in query:

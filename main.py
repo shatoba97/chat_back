@@ -1,4 +1,3 @@
-from typing import List, TypedDict
 from flask import Flask, url_for, request
 from peewee import *
 
