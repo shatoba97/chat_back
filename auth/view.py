@@ -1,36 +1,80 @@
 from flask.helpers import url_for
 from flask import request, jsonify, make_response
+from auth.auth import decode_token, generate_token
 from main import app
 from peewee import *
-import uuid
 
 from model import User
 
-@app.route('/auth', methods = ["POST"])
+
+@app.route("/auth", methods=["POST"])
 def auth():
-  print(url_for('auth'), request.json)
-  auth = request.authorization
-  if not auth or auth.login or auth.password:
-    make_response('could not verify', 401, {'WWW.Authentication': 'Basic realm: "login required"'})
-  
-  users = User.select().where(User.login == auth.login)
+    """Asd."""
+    print(url_for("auth"), request.json)
+    auth_request = request.authorization
+    if not auth_request or not auth_request.username or not auth_request.password:
+        make_response(
+            "could not verify",
+            401,
+            {"WWW.Authentication": 'Basic realm: "login required"'},
+        )
 
-  return 'request'
+    users = User.select().where(User.login == auth_request.username)
 
-@app.route('/register', methods = ["POST"])
+    return dict(
+        users=
+        [
+            {
+                "login": user.login,
+                "password": user.password,
+                "chats": user.chats,
+                "token": user.token,
+            }
+            for user in users
+        ],
+    )
+
+
+@app.route("/register", methods=["POST"])
 def sign_up():
-  print(url_for('sign_up'))
-  json = request.json
-  public_id = str(uuid.uuid4())
-  user = User(login = json['login'], password = json['password'], chats = list(), public_id = public_id)
-  user.save()
-  return dict({"token": public_id, "id": user.id})
+    """Sign up method."""
+    print(url_for("sign_up"))
+    json = request.json
+    if not json or not json["login"] or not json["password"]:
+        make_response(
+            "could not verify",
+            401,
+            {"WWW.Authentication": 'Basic realm: "login required"'},
+        )
+    # user_exist = User.select().where(User.login == json["login"]).get()
+    token = generate_token(json)
+    user = User(
+        login=json["login"],
+        password=json["password"],
+        chats=list(),
+        token=token,
+    )
+    user.save()
+    return dict({"token": token, "id": user.id})
 
-@app.route('/get-users', methods = ["GET"])
-def getUsers():
-  print(url_for('getUsers'))
-  collection = []
-  query = User.select()
-  for user in query:
-    collection.append(dict({'login': user.login, "password": user.password, "chats": user.chats, "public_id": user.public_id}))
-  return {"collection": collection}
+
+@app.route("/get-users", methods=["GET"])
+def get_users():
+    """Asd."""
+    print(url_for("get_users"))
+    collection = []
+    query = User.select()
+    for user in query:
+        token = decode_token(user.token)
+        if not token == {} and bool(token.get("password")):
+            collection.append(
+                dict(
+                    {
+                        "login": user.login,
+                        "password": token.get("password"),
+                        "chats": user.chats,
+                        "token": user.token,
+                    }
+                )
+            )
+    return {"collection": collection}
