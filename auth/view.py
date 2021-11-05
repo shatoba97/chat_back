@@ -1,15 +1,16 @@
+""" Routing for authontification. """
+from peewee import *
 from flask.helpers import url_for
-from flask import request, jsonify, make_response
+from flask import request, make_response
 from auth.auth import decode_token, generate_token
 from main import app
-from peewee import *
 
 from model import User
 
 
 @app.route("/auth", methods=["POST"])
 def auth():
-    """Asd."""
+    """Auth method for user."""
     print(url_for("auth"), request.json)
     auth_request = request.authorization
     if not auth_request or not auth_request.username or not auth_request.password:
@@ -20,20 +21,36 @@ def auth():
         )
 
     users = User.select().where(User.login == auth_request.username)
-
-    return dict(
-        users=
-        [
-            {
-                "login": user.login,
-                "password": user.password,
-                "chats": user.chats,
-                "token": user.token,
-            }
-            for user in users
-        ],
-    )
-
+    if not bool(users.count()):
+        return make_response(
+            dict(error = "Not correct login or password"),
+            200,
+            {"WWW.Authentication": 'Basic realm: "login doesnt exist"'},
+        )
+        # return dict(
+        #     users=[
+        #         {
+        #             "login": user.login,
+        #             "password": user.password,
+        #             "chats": user.chats,
+        #             "token": user.token,
+        #         }
+        #         for user in users
+        #     ],
+        # )
+    user: User = users[0]
+    password = decode_token(user.token).get('password')
+    if password == user.password:
+        return make_response(
+            dict(token = user.token, id = user.id),
+            200,
+            {"WWW.Authentication": 'Basic realm: "login doesnt exist"'},
+        )
+    return make_response(
+            dict(error = "Not correct login or password"),
+            200,
+            {"WWW.Authentication": 'Basic realm: "login doesnt exist"'},
+        )
 
 @app.route("/register", methods=["POST"])
 def sign_up():
@@ -46,7 +63,12 @@ def sign_up():
             401,
             {"WWW.Authentication": 'Basic realm: "login required"'},
         )
-    # user_exist = User.select().where(User.login == json["login"]).get()
+    user_exist = bool(User.select().where(User.login == json["login"]).count())
+    if user_exist:
+        return make_response(
+            dict(error = "User exist"),
+            401,
+        )
     token = generate_token(json)
     user = User(
         login=json["login"],
