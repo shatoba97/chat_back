@@ -8,8 +8,6 @@ class User(Model):
     password = CharField()
     token = CharField()
     chats = list()
-    def __init__(self, *args) -> None:
-        print(args)
     class Meta:
         database = telegram_db
 

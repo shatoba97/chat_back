@@ -6,51 +6,38 @@ from auth.auth import decode_token, generate_token
 from main import app
 
 from model import User
+from service.base_response import base_response
 
 
 @app.route("/auth", methods=["POST"])
 def auth():
     """Auth method for user."""
-    print(url_for("auth"), request.json)
+    print(url_for("auth"), '123', request.json)
     auth_request = request.authorization
     if not auth_request or not auth_request.username or not auth_request.password:
-        make_response(
-            "could not verify",
+        return base_response([], 
             401,
-            {"WWW.Authentication": 'Basic realm: "login required"'},
+            "could not verify",
         )
 
     users = User.select().where(User.login == auth_request.username)
     if not bool(users.count()):
         return make_response(
-            dict(error = "Not correct login or password"),
+            dict(error="User with this login doesn`t exist"),
             200,
-            {"WWW.Authentication": 'Basic realm: "login doesnt exist"'},
         )
-        # return dict(
-        #     users=[
-        #         {
-        #             "login": user.login,
-        #             "password": user.password,
-        #             "chats": user.chats,
-        #             "token": user.token,
-        #         }
-        #         for user in users
-        #     ],
-        # )
     user: User = users[0]
-    password = decode_token(user.token).get('password')
+    password = decode_token(user.token).get("password")
     if password == user.password:
-        return make_response(
-            dict(token = user.token, id = user.id),
+        return base_response(
+            dict(token=user.token, id=user.id),
             200,
-            {"WWW.Authentication": 'Basic realm: "login doesnt exist"'},
         )
     return make_response(
-            dict(error = "Not correct login or password"),
-            200,
-            {"WWW.Authentication": 'Basic realm: "login doesnt exist"'},
-        )
+        dict(error="Not correct login or password"),
+        200,
+    )
+
 
 @app.route("/register", methods=["POST"])
 def sign_up():
@@ -61,12 +48,11 @@ def sign_up():
         make_response(
             "could not verify",
             401,
-            {"WWW.Authentication": 'Basic realm: "login required"'},
         )
     user_exist = bool(User.select().where(User.login == json["login"]).count())
     if user_exist:
         return make_response(
-            dict(error = "User exist"),
+            dict(error="User exist"),
             401,
         )
     token = generate_token(json)
@@ -80,9 +66,24 @@ def sign_up():
     return dict({"token": token, "id": user.id})
 
 
+@app.route("/user", methods=["GET"])
+def get_user():
+    """Get user by token."""
+    print(url_for("get_user"))
+    authorization: str = request.environ['HTTP_AUTHORIZATION']
+    if not authorization:
+        return base_response([], 401, "Could not verify")
+
+    token = authorization.replace('Bearer ', '')
+    query = User.select().where(User.token == token)
+    if not bool(len(query)):
+        return base_response([], 401, "Token doesn`t valid")
+    user = query[0]
+    return base_response(dict(nick_name = user.login))
+
 @app.route("/get-users", methods=["GET"])
 def get_users():
-    """Asd."""
+    """Get list of all users for testing."""
     print(url_for("get_users"))
     collection = []
     query = User.select()
