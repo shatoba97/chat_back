@@ -12,10 +12,11 @@ from service.base_response import base_response
 @app.route("/auth", methods=["POST"])
 def auth():
     """Auth method for user."""
-    print(url_for("auth"), '123', request.json)
+    print(url_for("auth"), "123", request.json)
     auth_request = request.authorization
     if not auth_request or not auth_request.username or not auth_request.password:
-        return base_response([], 
+        return base_response(
+            [],
             401,
             "could not verify",
         )
@@ -39,7 +40,7 @@ def auth():
     )
 
 
-@app.route("/register", methods=["POST"])
+@app.route("/register-user", methods=["POST"])
 def sign_up():
     """Sign up method."""
     print(url_for("sign_up"))
@@ -61,6 +62,10 @@ def sign_up():
         password=json["password"],
         chats=list(),
         token=token,
+        nick_name=json["nickName"],
+        first_name=json["firstName"],
+        last_name=json["lastName"],
+        icon=json["icon"] or '',
     )
     user.save()
     return dict({"token": token, "id": user.id})
@@ -70,16 +75,17 @@ def sign_up():
 def get_user():
     """Get user by token."""
     print(url_for("get_user"))
-    authorization: str = request.environ['HTTP_AUTHORIZATION']
+    authorization: str = request.environ["HTTP_AUTHORIZATION"]
     if not authorization:
         return base_response([], 401, "Could not verify")
 
-    token = authorization.replace('Bearer ', '')
+    token = authorization.replace("Bearer ", "")
     query = User.select().where(User.token == token)
     if not bool(len(query)):
         return base_response([], 401, "Token doesn`t valid")
     user = query[0]
-    return base_response(dict(nick_name = user.login))
+    return base_response(dict(nick_name=user.login))
+
 
 @app.route("/get-users", methods=["GET"])
 def get_users():

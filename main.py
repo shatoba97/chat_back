@@ -13,10 +13,10 @@ from auth.view import *
 #   print(e)
 
 
+CORS(app)
 @app.after_request
 def add_header(response):
     return response
 
-CORS(app)
 if __name__ == "__main__":
     app.run(debug=True)

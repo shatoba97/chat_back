@@ -8,6 +8,10 @@ class User(Model):
     password = CharField()
     token = CharField()
     chats = list()
+    nick_name = CharField()
+    first_name = CharField()
+    last_name = CharField()
+    icon = CharField()
     class Meta:
         database = telegram_db
 
