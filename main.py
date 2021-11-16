@@ -14,9 +14,9 @@ from auth.view import *
 
 
 CORS(app)
-@app.after_request
-def add_header(response):
-    return response
+# @app.after_request
+# def add_header(response):
+#     return response
 
 if __name__ == "__main__":
     app.run(debug=True)
