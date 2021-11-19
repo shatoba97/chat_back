@@ -5,7 +5,7 @@ from flask import request, make_response
 from auth.auth import decode_token, generate_token, authorize, get_user, register_user
 from main import app
 
-from model import User
+from models.user import User
 from service.base_response import base_response
 
 
@@ -22,9 +22,9 @@ def sign_up():
     print(url_for("sign_up"))
     user_req = request.json
     return register_user(user_req)
+
+
 #######################################################
-
-
 
 
 @app.route("/user", methods=["GET"])

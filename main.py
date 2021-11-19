@@ -1,6 +1,9 @@
 from flask import Flask, url_for, request
 from peewee import *
 from flask_cors import CORS
+from models.chat import Chat
+from models.user import User
+
 
 telegram_db = SqliteDatabase("telegram.db")
 
@@ -19,4 +22,6 @@ CORS(app)
 #     return response
 
 if __name__ == "__main__":
+    telegram_db.drop_tables([User, Chat])
+    telegram_db.create_tables([User, Chat])
     app.run(debug=True)

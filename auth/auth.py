@@ -1,11 +1,10 @@
 """ asd """
 import datetime
-from typing import Any, Dict, Union
+from typing import Dict, Union
 from flask.helpers import make_response
-from flask.wrappers import Response
 import jwt
 from werkzeug.datastructures import Authorization
-from model import User
+from models.user import User
 from config import config
 from service.base_response import base_response
 
@@ -90,13 +89,13 @@ def register_user(user_req: Dict[str, str]):
     Returns:
         Response [Dict[str, str]]: Return token and id of new user
     """
-    if not user_req or not user_req["login"] or not user_req["password"]:
+    if not user_send_correct_data(user_req):
         return make_response(
             "could not verify",
             204,
         )
-    user_exist = bool(User.select().where(User.login == user_req["login"]).count())
-    if user_exist:
+    user_exists = User.select().where(User.login == user_req["login"]).exists()
+    if user_exists:
         return make_response(
             dict(error="User exist"),
             200,
@@ -105,17 +104,17 @@ def register_user(user_req: Dict[str, str]):
     user = User(
         login=user_req["login"],
         password=user_req["password"],
-        chats=list(),
         token=token,
-        nick_name=user_req["nickName"],
-        first_name=user_req["firstName"],
-        last_name=user_req["lastName"],
-        icon=user_req["icon"] or '',
+        nick_name=user_req.get("nickName"),
+        first_name=user_req.get("firstName"),
+        last_name=user_req.get("lastName"),
+        icon=user_req.get("icon"),
     )
     user.save()
     return base_response(dict({"token": token, "id": user.id}))
 
-
+def user_send_correct_data(user: dict) -> bool:
+    return user and 'login' in user and 'password' in user
 
 
 
