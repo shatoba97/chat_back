@@ -1,4 +1,4 @@
-from peewee import CharField, ForeignKeyAccessor
+from peewee import CharField, ForeignKeyAccessor, ForeignKeyField
 from models.base import BaseModel
 from models.user_chat import UserChat
 
@@ -6,4 +6,4 @@ from models.user_chat import UserChat
 class Chat(BaseModel):
     name_of_chat = CharField()
     icon = CharField(null=True)
-    userid = ForeignKeyAccessor(UserChat, backref='user')
+    userid = ForeignKeyField(UserChat, backref='user')

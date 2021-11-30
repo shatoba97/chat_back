@@ -1,15 +1,17 @@
 from flask import Flask, url_for, request
-from peewee import *
+
 from flask_cors import CORS
 from models.chat import Chat
+from models.base import telegram_db
+
+
+
 from models.user import User
-
-
-telegram_db = SqliteDatabase("telegram.db")
 
 app = Flask(__name__)
 
 from auth.view import *
+from chat.view import *
 
 # @app.errorhandler()
 # def handle_exception(e):

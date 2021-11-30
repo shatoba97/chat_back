@@ -1,5 +1,5 @@
 """ Asd. """
-from peewee import CharField, ForeignKeyAccessor
+from peewee import CharField, ForeignKeyField
 
 from models.base import BaseModel
 from models.user_chat import UserChat
@@ -16,4 +16,4 @@ class User(BaseModel):
     first_name = CharField(null=True)
     last_name = CharField(null=True)
     icon = CharField(null=True)
-    chat = ForeignKeyAccessor(UserChat, backref="chats", null=True)
+    chat = ForeignKeyField(UserChat, backref="chats", null=True)

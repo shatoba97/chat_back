@@ -1,5 +1,5 @@
-from peewee import Model
-from main import telegram_db
+from peewee import Model, SqliteDatabase
+telegram_db = SqliteDatabase("telegram.db")
 
 class BaseModel(Model):
     class Meta:

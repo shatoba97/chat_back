@@ -3,13 +3,18 @@ from flask import request, jsonify
 import jwt
 import config
 from models.user import User
+from flask import request
+from service.base_response import base_response
+
 
 
 def token_req(func):
     @wraps(func)
     def decorator(*args, **kargs):
-        token = None
-        return func("c", *args, **kargs)
+        token = request.environ.get("HTTP_AUTHORIZATION").replace("Bearer ", "");
+        if token:
+            return func("c", *args, **kargs)
+        return base_response([], 401, 'You dont sent token')
 
     return decorator
 

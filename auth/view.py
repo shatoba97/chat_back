@@ -1,8 +1,8 @@
 """ Routing for authontification. """
 from peewee import *
 from flask.helpers import url_for
-from flask import request, make_response
-from auth.auth import decode_token, generate_token, authorize, get_user, register_user
+from flask import request
+from auth.auth import decode_token, authorize, get_user, register_user
 from main import app
 
 from models.user import User
