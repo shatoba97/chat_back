@@ -3,3 +3,5 @@ PyJWT
 uuid
 peewee
 flask-cors
+black
+pylint

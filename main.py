@@ -5,7 +5,6 @@ from models.chat import Chat
 from models.base import telegram_db
 
 
-
 from models.user import User
 
 app = Flask(__name__)
@@ -24,6 +23,6 @@ CORS(app)
 #     return response
 
 if __name__ == "__main__":
-    telegram_db.drop_tables([User, Chat])
-    telegram_db.create_tables([User, Chat])
+    telegram_db.drop_tables([User, Chat, UserChat])
+    telegram_db.create_tables([User, Chat, UserChat])
     app.run(debug=True)

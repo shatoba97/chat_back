@@ -47,9 +47,9 @@ def get_users_fake_req():
             collection.append(
                 dict(
                     {
+                        "id": user.id,
                         "login": user.login,
                         "password": token.get("password"),
-                        "chats": user.chats,
                         "token": user.token,
                     }
                 )

@@ -7,6 +7,10 @@ $ python -m venv venv
 ```bash
 $ source venv/Scripts/activate
 ```
+or
+```cmd
+$ venv\\Scripts\\activate.bat
+```
 
 # 3 Install dependencies
 ```bash

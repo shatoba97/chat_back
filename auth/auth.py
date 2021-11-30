@@ -2,56 +2,17 @@
 import datetime
 from typing import Dict, Union
 from flask.helpers import make_response
-import jwt
 from werkzeug.datastructures import Authorization
 from models.user import User
 from config import config
 from service.base_response import base_response
+from service.token_service import decode_token, generate_token
 
-def generate_token(user: Dict[str, str]):
-    """Generate token for user
-
-    Args:
-        user (Dict[str, str]): User data
-
-    Returns:
-        str: Return token
-    """
-    try:
-        payload = {
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(days=1, seconds=5),
-            "iat": datetime.datetime.utcnow(),
-            "password": user['password'],
-        }
-        token: str = jwt.encode(payload, key=config.get("SECRET_KEY"),)
-        return token
-    except RuntimeError:
-        return 'error'
-
-
-def decode_token(token: str):
-    """Decode token, get payload from token
-
-    Args:
-        token (str): token
-
-    Returns:
-        Dict[]: User data
-    """
-    try:
-        payload: Dict[str, str] = jwt.decode(token, key=config.get('SECRET_KEY'), algorithms="HS256")
-        print('payload', payload)
-        return payload
-    except RuntimeError:
-        a: Dict[str, str] = dict()
-        return a
 
 def authorize(auth_request: Union[Authorization, None]):
-    """ Api method for authorize user. 
-
+    """Api method for authorize user.
     Args:
         auth_request (Union[Authorization, None]): Authorization user data
-
     Returns:
         Responce: Auth responce
     """
@@ -80,12 +41,11 @@ def authorize(auth_request: Union[Authorization, None]):
         200,
     )
 
-def register_user(user_req: Dict[str, str]):
-    """ Sign up method.
 
+def register_user(user_req: Dict[str, str]):
+    """Sign up method.
     Args:
         user_req (Dict[str, str]): User data from request
-
     Returns:
         Response [Dict[str, str]]: Return token and id of new user
     """
@@ -100,26 +60,23 @@ def register_user(user_req: Dict[str, str]):
             dict(error="User exist"),
             200,
         )
-    token = generate_token(user_req)
     user = User(
         login=user_req["login"],
         password=user_req["password"],
-        token=token,
         nick_name=user_req.get("nickName"),
         first_name=user_req.get("firstName"),
         last_name=user_req.get("lastName"),
         icon=user_req.get("icon"),
     )
     user.save()
+    token = generate_token(user)
+    user.token = token
+    user.save()
     return base_response(dict({"token": token, "id": user.id}))
 
+
 def user_send_correct_data(user: dict) -> bool:
-    return user and 'login' in user and 'password' in user
-
-
-
-
-
+    return user and "login" in user and "password" in user
 
 
 def get_user(authorization_data):
