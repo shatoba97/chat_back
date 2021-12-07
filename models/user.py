@@ -15,4 +15,3 @@ class User(BaseModel):
     first_name = CharField(null=True)
     last_name = CharField(null=True)
     icon = CharField(null=True)
-    chat = ForeignKeyField(UserChat, backref="chats", null=True)

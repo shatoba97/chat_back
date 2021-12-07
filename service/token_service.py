@@ -25,7 +25,7 @@ def token_req(func):
                 data = decode_token(token)
                 if token_expired(data):
                     return base_response([], 401, "Invalid token")
-                user = User.select().where(User.id == data.get("id")).get();
+                user = User.select().where(User.id == data.get("id")).get()
                 if not user:
                     return base_response([], 401, "Invalid token")
                 return func(user, *args, **kargs)
@@ -82,26 +82,3 @@ def decode_token(token: str) -> Dict[str, str]:
     except RuntimeError:
         a: Dict[str, str] = dict()
         return a
-
-
-def token_required(f):
-    @wraps(f)
-    def decorator(*args, **kwargs):
-
-        token = None
-
-        if "x-access-tokens" in request.headers:
-            token = request.headers["x-access-tokens"]
-
-        if not token:
-            return jsonify({"message": "a valid token is missing"})
-
-        try:
-            data = jwt.decode(token, config["SECRET_KEY"])
-            current_user = User.query.filter_by(public_id=data["public_id"]).first()
-        except:
-            return jsonify({"message": "token is invalid"})
-
-        return f(current_user, *args, **kwargs)
-
-    return decorator
