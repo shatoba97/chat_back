@@ -2,7 +2,6 @@
 from peewee import CharField, ForeignKeyField
 
 from models.base import BaseModel
-from models.user_chat import UserChat
 
 
 class User(BaseModel):
@@ -15,3 +14,4 @@ class User(BaseModel):
     first_name = CharField(null=True)
     last_name = CharField(null=True)
     icon = CharField(null=True)
+    

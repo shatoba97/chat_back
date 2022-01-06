@@ -30,15 +30,32 @@ def authorize(auth_request: Union[Authorization, None]):
             200,
         )
     user: User = users[0]
-    password = decode_token(user.token).get("password")
-    if password == user.password:
-        return base_response(
-            dict(token=user.token, id=user.id),
-            200,
+    decode = decode_token(user.token)
+    if decode.get("expired"):
+        token = generate_token(user)
+        user.token = token
+        user.save()
+        password = decode_token(token)
+        if password == auth_request.password:
+            return base_response(
+                dict(token=user.token, id=user.id),
+                200,
+            )
+        return make_response(
+            dict(error="Not correct login or password"),
+            401,
         )
+        
+    if not decode.get("expired"):
+        if decode.get("password") == auth_request.password:
+            return base_response(
+                dict(token=user.token, id=user.id),
+                200,
+            )
+
     return make_response(
         dict(error="Not correct login or password"),
-        200,
+        401,
     )
 
 

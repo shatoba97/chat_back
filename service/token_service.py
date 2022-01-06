@@ -1,7 +1,8 @@
 from functools import wraps
 from typing import Dict
-from flask import request, jsonify
+from flask import request
 import jwt
+from jwt import ExpiredSignatureError, DecodeError
 from config import config
 from models.user import User
 from flask import request
@@ -14,7 +15,7 @@ def token_req(func):
     @wraps(func)
     def decorator(*args, **kargs):
         token = None
-        if not request.environ.get("HTTP_AUTHORIZATION") and not request.environ.get(
+        if not request.environ.get("HTTP_AUTHORIZATION") or not request.environ.get(
             "HTTP_AUTHORIZATION"
         ).count("Bearer"):
             base_response([], 401, "Token is invalid")
@@ -74,11 +75,14 @@ def decode_token(token: str) -> Dict[str, str]:
         Dict[]: User data
     """
     try:
+        if not token:
+            a: Dict[str, str] = dict(password="", expired=True)
+            return a
         payload: Dict[str, str] = jwt.decode(
             token, key=config.get("SECRET_KEY"), algorithms="HS256"
         )
-        print("payload", payload)
+        print("payload", dict(password=payload.get("password"), expired=False))
         return payload
-    except RuntimeError:
-        a: Dict[str, str] = dict()
+    except RuntimeError or DecodeError or ExpiredSignatureError:
+        a: Dict[str, str] = dict(password="", expired=True)
         return a

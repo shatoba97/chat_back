@@ -16,9 +16,9 @@ from service.token_service import token_req
 def get_all_chats(user: User):
     print(url_for("get_all_chats"), user)
     chats = (
-        Chat.select()
-        .join(UserChat)
-        .where(UserChat.user_id == user.id)
+        UserChat.select()
+        .join(User)
+        .where(UserChat.user.id == user.id)
     )
     
     if len(chats):
@@ -31,7 +31,7 @@ def get_all_chats(user: User):
             },
             200,
         )
-    return base_response(None, 500, "No chats")
+    return base_response([], 200)
 
 
 @app.route("/chat", methods=["POST"])

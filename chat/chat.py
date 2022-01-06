@@ -21,7 +21,8 @@ def register_chat(user: User, chat: Dict[str, str]) -> Response:
             name_of_chat=chat.get("chatName"), icon=chat.get("icon"), userid=user.id
         )
         chat_db.save()
-        UserChat.create(chat_id=chat_db.id, user_id=user.id)
+        userChat = UserChat(chat=chat_db, user=user)
+        userChat.save()
     except Exception as error:
         print(error)
 

@@ -1,9 +1,11 @@
-from peewee import IntegerField
+from peewee import ForeignKeyField, IntegerField
 from models.base import BaseModel
+from models.chat import Chat
+from models.user import User
 
 
 class UserChat(BaseModel):
     """Connect 2 tables chat and user"""
 
-    chat_id = IntegerField(unique=True)
-    user_id = IntegerField(unique=True)
+    chat = ForeignKeyField(Chat, unique=False)
+    user = ForeignKeyField(User, unique=False)
