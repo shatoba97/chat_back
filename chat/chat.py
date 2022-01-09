@@ -1,6 +1,6 @@
 from typing import Dict
 from flask.wrappers import Response
-from peewee import Expression
+from peewee import Expression, IntegrityError
 from models.user import User
 from service.base_response import base_response
 
@@ -9,8 +9,8 @@ from models.chat import Chat
 from models.user_chat import UserChat
 
 
-def register_chat(user: User, chat: Dict[str, str]) -> Response:
-    if not chat and not chat.name_of_chat:
+def register_chat(user: User, chat_req: Dict[str, str]) -> Response:
+    if not chat_req and not chat_req.name_of_chat:
         return base_response(
             None,
             500,
@@ -18,12 +18,12 @@ def register_chat(user: User, chat: Dict[str, str]) -> Response:
         )
     try:
         chat_db = Chat(
-            name_of_chat=chat.get("chatName"), icon=chat.get("icon"), userid=user.id
+            name_of_chat=chat_req.get("chatName"), icon=chat_req.get("icon"), userid=user.id
         )
         chat_db.save()
         userChat = UserChat(chat=chat_db, user=user)
         userChat.save()
-    except Exception as error:
+    except (Exception, IntegrityError) as error:
         print(error)
 
     return base_response(

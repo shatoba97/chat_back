@@ -15,18 +15,14 @@ from service.token_service import token_req
 @token_req
 def get_all_chats(user: User):
     print(url_for("get_all_chats"), user)
-    chats = (
-        UserChat.select()
-        .join(User)
-        .where(UserChat.user.id == user.id)
-    )
-    
-    if len(chats):
+    userChats = UserChat.select(UserChat.chat).join(User).where(UserChat.user.id == user.id)
+
+    if len(userChats):
         return base_response(
             {
                 "chats": [
-                    {"chat_id": chat.id, "chat_name": chat.name_of_chat}
-                    for chat in chats
+                    {"chat_id": userChat.chat.id, "chat_name": userChat.chat.name_of_chat}
+                    for userChat in userChats
                 ]
             },
             200,
@@ -40,7 +36,3 @@ def create_chats(user):
     print(url_for("create_chats"), user)
     chat_req = request.json
     return register_chat(user, chat_req)
-    chats = User.select().join(UserChat, on=(UserChat.user_id == User.id)).first()
-    if chats:
-        return base_response({})
-    return base_response(None, 500, "No chats")

@@ -1,4 +1,4 @@
-from peewee import CharField, ForeignKeyAccessor, ForeignKeyField
+from peewee import CharField
 from models.base import BaseModel
 
 class Chat(BaseModel):

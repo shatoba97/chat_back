@@ -1,12 +1,11 @@
 """ Asd. """
-from peewee import CharField, ForeignKeyField
+from peewee import CharField
 
 from models.base import BaseModel
 
 
 class User(BaseModel):
     """Base user model."""
-
     login = CharField(unique=True)
     password = CharField()
     token = CharField(unique=True, null=True)

@@ -18,13 +18,13 @@ def token_req(func):
         if not request.environ.get("HTTP_AUTHORIZATION") or not request.environ.get(
             "HTTP_AUTHORIZATION"
         ).count("Bearer"):
-            base_response([], 401, "Token is invalid")
+            return base_response([], 401, "Token is invalid")
 
         token = request.environ.get("HTTP_AUTHORIZATION").replace("Bearer ", "")
         if token:
             try:
                 data = decode_token(token)
-                if token_expired(data):
+                if token_expired(data) or not data.get("id"):
                     return base_response([], 401, "Invalid token")
                 user = User.select().where(User.id == data.get("id")).get()
                 if not user:
@@ -83,6 +83,7 @@ def decode_token(token: str) -> Dict[str, str]:
         )
         print("payload", dict(password=payload.get("password"), expired=False))
         return payload
-    except RuntimeError or DecodeError or ExpiredSignatureError:
+    except (RuntimeError, DecodeError, ExpiredSignatureError) as ex:
+        print(ex)
         a: Dict[str, str] = dict(password="", expired=True)
         return a
